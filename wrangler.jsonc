@@ -1,0 +1,6 @@
+{
+  "name": "tcm-test-proxy",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-19",
+  "account_id": "2a28c2b3efa591fb6958de1a6fa26cb0"
+}
