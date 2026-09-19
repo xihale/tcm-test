@@ -1,6 +1,6 @@
 // 反代到 Cloudflare Pages 源站，配合 Worker Route + 灰云 CNAME 优选域名使用
 // 静态资源（immutable）在边缘 Cache API 永久缓存；HTML 缓存 5 分钟，部署后最长延迟 5 分钟可见
-const ORIGIN = 'tcm-test.pages.dev'
+const ORIGIN = 'tcm-test-git.pages.dev'
 const HSTS = 'max-age=31536000; includeSubDomains'
 
 async function handle(request, ctx) {
