@@ -56,6 +56,9 @@ const resumedAt = computed(() =>
           </button>
           <p class="resume-meta">上次保存于 {{ resumedAt }}</p>
         </template>
+        <button type="button" class="guide-link" @click="store.openGuide()">
+          先浏览九种体质介绍
+        </button>
       </div>
 
       <footer class="foot">结果仅供养生参考，不能替代医师诊断。数据仅保存在本机。</footer>
@@ -151,6 +154,24 @@ const resumedAt = computed(() =>
   margin: 0;
   font-size: 12px;
   color: var(--ink-faint);
+}
+
+.guide-link {
+  margin-top: 18px;
+  background: none;
+  border: none;
+  padding: 4px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-strong);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.guide-link:hover {
+  color: var(--accent-deep);
 }
 
 .foot {

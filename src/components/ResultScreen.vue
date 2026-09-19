@@ -4,6 +4,7 @@ import { NIcon, NModal, useMessage } from 'naive-ui'
 import { ChevronDown, CopyOutline, PrintOutline, RefreshOutline } from '@vicons/ionicons5'
 import { useAssessmentStore } from '../stores/assessment'
 import type { ConstitutionResult } from '../utils/scoring'
+import ConstitutionDetail from './ConstitutionDetail.vue'
 import SealMark from './SealMark.vue'
 import ScoreRadar from './ScoreRadar.vue'
 
@@ -20,6 +21,22 @@ const sealText = computed(() => {
   const primary = dominant.value[0]
   return primary ? primary.constitution.name.slice(0, 2) : '辨体'
 })
+
+const pingheOk = computed(() => {
+  const p = ordered.value.find((r) => r.constitution.isPinghe)
+  return p?.verdict === '是' || p?.verdict === '基本是'
+})
+
+/** 倾向多于一种时，标题改用短句，体质名以徽片列出，避免长串名称堆成大段 */
+const multiTrend = computed(() => !pingheOk.value && dominant.value.length > 1)
+
+const displayHeadline = computed(() => (multiTrend.value ? '您的体质呈现多种倾向' : headline.value))
+
+function chipClass(r: ConstitutionResult): string {
+  if (r.verdict === '倾向是') return 'chip--lean'
+  if (r.verdict === '基本是') return 'chip--tint'
+  return 'chip--solid'
+}
 
 /**
  * 判定层级用「视觉分量」表达，而非多种颜色：
@@ -75,7 +92,18 @@ async function onCopy() {
     <div class="result-inner">
       <header class="result-hero">
         <SealMark :text="sealText" :size="72" />
-        <h1 class="headline">{{ headline }}</h1>
+        <h1 class="headline">{{ displayHeadline }}</h1>
+        <div v-if="multiTrend" class="trend-chips">
+          <span
+            v-for="r in dominant"
+            :key="r.constitution.id"
+            class="chip"
+            :class="chipClass(r)"
+          >
+            {{ r.constitution.name }}
+            <i>{{ r.verdict }}</i>
+          </span>
+        </div>
         <p class="meta">{{ assessedAt }} · 依据《中医体质分类与判定》标准</p>
       </header>
 
@@ -96,24 +124,8 @@ async function onCopy() {
           </header>
           <p class="card-trait">{{ r.constitution.trait }}</p>
 
-          <div class="card-columns">
-            <div class="card-col">
-              <h3>常见表现</h3>
-              <ul class="sign-list">
-                <li v-for="(s, j) in r.constitution.signs" :key="j">{{ s }}</li>
-              </ul>
-            </div>
-            <div class="card-col">
-              <h3>调养建议</h3>
-              <dl class="advice-list">
-                <dt>饮食</dt>
-                <dd>{{ r.constitution.advice.diet }}</dd>
-                <dt>起居</dt>
-                <dd>{{ r.constitution.advice.lifestyle }}</dd>
-                <dt>运动</dt>
-                <dd>{{ r.constitution.advice.exercise }}</dd>
-              </dl>
-            </div>
+          <div class="card-body">
+            <ConstitutionDetail :constitution="r.constitution" />
           </div>
         </article>
       </section>
@@ -218,6 +230,60 @@ async function onCopy() {
   color: var(--ink-faint);
 }
 
+/* 多倾向徽片：延续判定徽标的视觉层级（是=实心，基本是=浅底，倾向是=描边） */
+.trend-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 720px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chip i {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chip--solid {
+  background: var(--accent);
+  color: #fff;
+}
+
+.chip--solid i {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.chip--tint {
+  background: var(--accent-tint);
+  color: var(--accent-deep);
+}
+
+.chip--tint i {
+  color: var(--accent);
+}
+
+.chip--lean {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+  background: transparent;
+}
+
+.chip--lean i {
+  color: var(--accent);
+}
+
 .dominant-list {
   display: flex;
   flex-direction: column;
@@ -275,51 +341,10 @@ async function onCopy() {
   color: var(--ink-soft);
 }
 
-.card-columns {
+.card-body {
   margin-top: 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
   border-top: 1px solid var(--line);
   padding-top: 20px;
-}
-
-.card-col h3 {
-  margin: 0 0 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-faint);
-}
-
-.sign-list {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--ink-soft);
-  font-size: 14.5px;
-}
-
-.sign-list li + li {
-  margin-top: 4px;
-}
-
-.advice-list {
-  margin: 0;
-  font-size: 14.5px;
-}
-
-.advice-list dt {
-  font-weight: 600;
-  color: var(--accent-deep);
-  margin-top: 8px;
-}
-
-.advice-list dt:first-child {
-  margin-top: 0;
-}
-
-.advice-list dd {
-  margin: 2px 0 0;
-  color: var(--ink-soft);
 }
 
 /* 判定徽标：用语义层级而非多种颜色 */
@@ -495,7 +520,6 @@ async function onCopy() {
 }
 
 @media (max-width: 760px) {
-  .card-columns,
   .overview-grid {
     grid-template-columns: 1fr;
   }

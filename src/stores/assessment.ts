@@ -5,7 +5,7 @@ import { evaluate, unansweredOf, type AnswerMap, type AssessmentResult } from '.
 
 const STORAGE_KEY = 'tcm-constitution-assessment/v1'
 
-export type Stage = 'intro' | 'quiz' | 'result'
+export type Stage = 'intro' | 'quiz' | 'result' | 'guide'
 
 interface PersistedState {
   answers: AnswerMap
@@ -59,6 +59,15 @@ export const useAssessmentStore = defineStore('assessment', () => {
 
   function resume() {
     stage.value = 'quiz'
+  }
+
+  /** 体质图鉴：测评前浏览九种体质的介绍与调养建议 */
+  function openGuide() {
+    stage.value = 'guide'
+  }
+
+  function exitGuide() {
+    stage.value = 'intro'
   }
 
   function goTo(index: number) {
@@ -128,6 +137,8 @@ export const useAssessmentStore = defineStore('assessment', () => {
     answer,
     start,
     resume,
+    openGuide,
+    exitGuide,
     goTo,
     next,
     prev,

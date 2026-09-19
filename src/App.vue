@@ -5,8 +5,9 @@ import { useAssessmentStore } from './stores/assessment'
 import IntroScreen from './components/IntroScreen.vue'
 import QuizScreen from './components/QuizScreen.vue'
 
-// 结果页（含 ECharts）按需加载，首屏更轻
+// 结果页（含 ECharts）与体质图鉴按需加载，首屏更轻
 const ResultScreen = defineAsyncComponent(() => import('./components/ResultScreen.vue'))
+const ConstitutionGuide = defineAsyncComponent(() => import('./components/ConstitutionGuide.vue'))
 
 const store = useAssessmentStore()
 const stage = computed(() => store.stage)
@@ -32,6 +33,7 @@ const themeOverrides: GlobalThemeOverrides = {
         <Transition name="stage-fade" mode="out-in">
           <IntroScreen v-if="stage === 'intro'" key="intro" />
           <QuizScreen v-else-if="stage === 'quiz'" key="quiz" />
+          <ConstitutionGuide v-else-if="stage === 'guide'" key="guide" />
           <ResultScreen v-else key="result" />
         </Transition>
       </main>
